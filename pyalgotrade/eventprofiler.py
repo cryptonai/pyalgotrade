@@ -234,7 +234,9 @@ def build_plot(profilerResults):
     eventT = profilerResults.getLookBack()
     # stdBegin = eventT + 1
     # plt.errorbar(x[stdBegin:], y[stdBegin:], std[stdBegin:], alpha=0, ecolor='#AAAAFF')
-    plt.errorbar(x[eventT+1:], y[eventT+1:], std[eventT+1:], alpha=0, ecolor='#AAAAFF')
+    # alpha gives me error on mac
+    # plt.errorbar(x[eventT+1:], y[eventT+1:], std[eventT+1:], alpha=0, ecolor='#AAAAFF')
+    plt.errorbar(x[eventT+1:], y[eventT+1:], std[eventT+1:], ecolor='#AAAAFF')
     # plt.errorbar(x, y, std, alpha=0, ecolor='#AAAAFF')
     plt.axhline(y=y[eventT], xmin=-1*profilerResults.getLookBack(), xmax=profilerResults.getLookForward(), color='#000000')
     plt.xlim(profilerResults.getLookBack()*-1-0.5, profilerResults.getLookForward()+0.5)
