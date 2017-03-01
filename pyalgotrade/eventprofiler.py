@@ -217,7 +217,7 @@ class Profiler(object):
             feed.getNewValuesEvent().unsubscribe(self.__onBars)
 
 
-def build_plot(profilerResults):
+def build_plot(profilerResults, alpha):
     # Calculate each value.
     x = []
     y = []
@@ -235,8 +235,7 @@ def build_plot(profilerResults):
     # stdBegin = eventT + 1
     # plt.errorbar(x[stdBegin:], y[stdBegin:], std[stdBegin:], alpha=0, ecolor='#AAAAFF')
     # alpha gives me error on mac
-    # plt.errorbar(x[eventT+1:], y[eventT+1:], std[eventT+1:], alpha=0, ecolor='#AAAAFF')
-    plt.errorbar(x[eventT+1:], y[eventT+1:], std[eventT+1:], ecolor='#AAAAFF')
+    plt.errorbar(x[eventT+1:], y[eventT+1:], std[eventT+1:], alpha=alpha, ecolor='#AAAAFF')
     # plt.errorbar(x, y, std, alpha=0, ecolor='#AAAAFF')
     plt.axhline(y=y[eventT], xmin=-1*profilerResults.getLookBack(), xmax=profilerResults.getLookForward(), color='#000000')
     plt.xlim(profilerResults.getLookBack()*-1-0.5, profilerResults.getLookForward()+0.5)
@@ -244,12 +243,12 @@ def build_plot(profilerResults):
     plt.ylabel('Cumulative returns')
 
 
-def plot(profilerResults):
+def plot(profilerResults, alpha=0):
     """Plots the result of the analysis.
 
     :param profilerResults: The result of the analysis
     :type profilerResults: :class:`Results`.
     """
 
-    build_plot(profilerResults)
+    build_plot(profilerResults, alpha)
     plt.show()
