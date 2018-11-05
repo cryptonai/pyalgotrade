@@ -49,10 +49,12 @@ class BaseBarFeed(feed.BaseFeed):
         self.__useAdjustedValues = False
         self.__defaultInstrument = None
         self.__currentBars = None
+        self.__currentPeekBars = None
         self.__lastBars = {}
 
     def reset(self):
         self.__currentBars = None
+        self.__currentPeekBars = None
         self.__lastBars = {}
         super(BaseBarFeed, self).reset()
 
@@ -85,6 +87,10 @@ class BaseBarFeed(feed.BaseFeed):
         """
         raise NotImplementedError()
 
+    @abc.abstractmethod
+    def getNextPeekBars(self):
+        raise NotImplementedError()
+
     def createDataSeries(self, key, maxLen):
         ret = bards.BarDataSeries(maxLen)
         ret.setUseAdjustedValues(self.__useAdjustedValues)
@@ -111,11 +117,35 @@ class BaseBarFeed(feed.BaseFeed):
                 self.__lastBars[instrument] = bars[instrument]
         return (dateTime, bars)
 
+    def getNextPeekValues(self):
+        dateTime = None
+        bars = self.getNextPeekBars()
+        if bars is not None:
+            dateTime = bars.getDateTime()
+
+            # Check that current bar datetimes are greater than the previous one.
+            if self.__currentPeekBars is not None and self.__currentPeekBars.getDateTime() >= dateTime:
+                raise Exception(
+                    "Bar date times are not in order. Previous datetime was %s and current datetime is %s" % (
+                        self.__currentPeekBars.getDateTime(),
+                        dateTime
+                    )
+                )
+
+            # Update self.__currentPeekBars and self.__lastBars
+            self.__currentPeekBars = bars
+            for instrument in bars.getInstruments():
+                self.__lastBars[instrument] = bars[instrument]
+        return (dateTime, bars)
+
     def getFrequency(self):
         return self.__frequency
 
     def isIntraday(self):
         return self.__frequency < bar.Frequency.DAY
+
+    def getCurrentPeekBars(self):
+        return self.__currentPeekBars
 
     def getCurrentBars(self):
         """Returns the current :class:`pyalgotrade.bar.Bars`."""

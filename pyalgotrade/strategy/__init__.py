@@ -58,6 +58,7 @@ class BaseStrategy(object):
         self.__dispatcher = dispatcher.Dispatcher()
         self.__broker.getOrderUpdatedEvent().subscribe(self.__onOrderEvent)
         self.__barFeed.getNewValuesEvent().subscribe(self.__onBars)
+        self.__barFeed.getNewPeekValuesEvent().subscribe(self.__onPeeks)
 
         self.__dispatcher.getStartEvent().subscribe(self.onStart)
         self.__dispatcher.getIdleEvent().subscribe(self.__onIdle)
@@ -466,6 +467,10 @@ class BaseStrategy(object):
         """
         raise NotImplementedError()
 
+    @abc.abstractmethod
+    def onPeeks(self, bars):
+        raise NotImplementedError()
+
     def onOrderUpdated(self, order):
         """Override (optional) to get notified when an order gets updated.
 
@@ -506,6 +511,9 @@ class BaseStrategy(object):
 
         # 3: Notify that the bars were processed.
         self.__barsProcessedEvent.emit(self, bars)
+
+    def __onPeeks(self, dateTime, bars):
+        self.onPeeks(bars)
 
     def run(self):
         """Call once (**and only once**) to run the strategy."""
