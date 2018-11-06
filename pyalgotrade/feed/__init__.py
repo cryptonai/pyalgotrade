@@ -53,7 +53,7 @@ class BaseFeed(observer.Subject):
 
         self.__ds = {}
         self.__event = observer.Event()
-        self.__peekEvent = observer.Event()
+        self.__realtimeEvent = observer.Event()
         self.__maxLen = maxLen
 
     def reset(self):
@@ -75,7 +75,7 @@ class BaseFeed(observer.Subject):
         raise NotImplementedError()
     
     @abc.abstractmethod
-    def getNextPeekValues(self):
+    def getNextRealtimeValues(self):
         raise NotImplementedError()
 
     def registerDataSeries(self, key):
@@ -95,8 +95,8 @@ class BaseFeed(observer.Subject):
                 ds.appendWithDateTime(dateTime, value)
         return (dateTime, values)
 
-    def getNextPeekValuesAndUpdateDS(self):
-        dateTime, values = self.getNextPeekValues()
+    def getNextRealtimeValuesAndUpdateDS(self):
+        dateTime, values = self.getNextRealtimeValues()
         if dateTime is not None:
             for key, value in values.items():
                 # Get or create the datseries for each key.
@@ -120,17 +120,17 @@ class BaseFeed(observer.Subject):
         """
         return self.__event
 
-    def getNewPeekValuesEvent(self):
-        return self.__peekEvent
+    def getNewRealtimeValuesEvent(self):
+        return self.__realtimeEvent
 
     def dispatch(self):
         dateTime, values = self.getNextValuesAndUpdateDS()
         if dateTime is not None:
             self.__event.emit(dateTime, values)
         else:
-            dateTime, values = self.getNextPeekValuesAndUpdateDS()
+            dateTime, values = self.getNextRealtimeValuesAndUpdateDS()
             if dateTime is not None:
-                self.__peekEvent.emit(dateTime, values)
+                self.__realtimeEvent.emit(dateTime, values)
         return dateTime is not None
 
     def getKeys(self):
