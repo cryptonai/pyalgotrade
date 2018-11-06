@@ -6,7 +6,7 @@ from pyalgotrade.barfeed import BaseBarFeed
 from quantlib.net2 import quote, history
 import pyalgotrade.logger
 from quantlib.const.market import TimeSeries
-
+import pytz
 import datetime
 
 # This is only for backward compatibility since Frequency used to be defined here and not in bar.py.
@@ -58,7 +58,7 @@ class LiveBarFeed(BaseBarFeed):
         tmp = quote(self.__instrument)
         if tmp is None:
             return None
-        tmp = bar.BasicBar(datetime.datetime.utcnow(),
+        tmp = bar.BasicBar(datetime.datetime.utcnow().replace(tzinfo=pytz.utc),
                            tmp.iloc[0]['close'].iloc[0],
                            tmp.iloc[0]['close'].iloc[0],
                            tmp.iloc[0]['close'].iloc[0],
