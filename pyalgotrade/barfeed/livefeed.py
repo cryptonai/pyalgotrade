@@ -22,6 +22,7 @@ class LiveBarFeed(BaseBarFeed):
         self.__instrument = instrument
         self.__last_date = None
         self.__bars_buf = []
+        self.__data_downloaded = False
         self.__start_date = start
 
     def getCurrentDateTime(self):
@@ -31,7 +32,7 @@ class LiveBarFeed(BaseBarFeed):
         return False
 
     def getNextBars(self):
-        if not self.__bars_buf:
+        if not self.__data_downloaded:
             logger.info('featch history of {0}'.format(self.__instrument))
             if self.getFrequency() == Frequency.DAY:
                 tmp = history(self.__instrument, self.__start_date, None,
@@ -45,6 +46,7 @@ class LiveBarFeed(BaseBarFeed):
                                       row['low'], row['close'], 0, False,
                                       self.getFrequency())
                 self.__bars_buf.append(tmpbar)
+            self.__data_downloaded = True
         try:
             tmp = self.__bars_buf.pop(0)
             return bar.Bars({self.__instrument: tmp})
@@ -52,6 +54,7 @@ class LiveBarFeed(BaseBarFeed):
             return None
 
     def getNextPeekBars(self):
+        logger.info('get quote of {0}'.format(self.__instrument))
         tmp = quote(self.__instrument)
         if tmp is None:
             return None
