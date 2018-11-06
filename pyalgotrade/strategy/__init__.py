@@ -1,6 +1,6 @@
 # PyAlgoTrade
 #
-# Copyright 2011-2015 Gabriel Martin Becedillas Ruiz
+# Copyright 2011-2018 Gabriel Martin Becedillas Ruiz
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@
 import abc
 import logging
 
+import six
+
 import pyalgotrade.broker
 from pyalgotrade.broker import backtesting
 from pyalgotrade import observer
@@ -30,6 +32,7 @@ from pyalgotrade import logger
 from pyalgotrade.barfeed import resampled
 
 
+@six.add_metaclass(abc.ABCMeta)
 class BaseStrategy(object):
     """Base class for strategies.
 
@@ -41,8 +44,6 @@ class BaseStrategy(object):
     .. note::
         This is a base class and should not be used directly.
     """
-
-    __metaclass__ = abc.ABCMeta
 
     LOGGER_NAME = "strategy"
 
@@ -60,6 +61,7 @@ class BaseStrategy(object):
         self.__barFeed.getNewValuesEvent().subscribe(self.__onBars)
         self.__barFeed.getNewPeekValuesEvent().subscribe(self.__onPeeks)
 
+        # onStart will be called once all subjects are started.
         self.__dispatcher.getStartEvent().subscribe(self.onStart)
         self.__dispatcher.getIdleEvent().subscribe(self.__onIdle)
 
@@ -564,7 +566,7 @@ class BaseStrategy(object):
         :rtype: :class:`pyalgotrade.barfeed.BaseBarFeed`.
         """
         ret = resampled.ResampledBarFeed(self.getFeed(), frequency)
-        ret.getNewValuesEvent().subscribe(callback)
+        ret.getNewValuesEvent().subscribe(lambda dt, bars: callback(bars))
         self.getDispatcher().addSubject(ret)
         self.__resampledBarFeeds.append(ret)
         return ret
