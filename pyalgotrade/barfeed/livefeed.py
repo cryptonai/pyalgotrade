@@ -4,20 +4,25 @@ from pyalgotrade import feed
 from pyalgotrade import dispatchprio
 from pyalgotrade.barfeed import BaseBarFeed
 from quantlib.net2 import quote, history
+import pyalgotrade.logger
+from quantlib.const.market import TimeSeries
 
 import datetime
 
 # This is only for backward compatibility since Frequency used to be defined here and not in bar.py.
 Frequency = bar.Frequency
 
+logger = pyalgotrade.logger.getLogger('livebarfeed')
 
 class LiveBarFeed(BaseBarFeed):
 
-    def __init__(self, instrument, frequency, maxLen=None):
+    def __init__(self, instrument, frequency, maxLen=None,
+                 start=datetime.datetime(1988, 1, 1)):
         super(LiveBarFeed, self).__init__(frequency, maxLen=maxLen)
         self.__instrument = instrument
         self.__last_date = None
         self.__bars_buf = []
+        self.__start_date = start
 
     def getCurrentDateTime(self):
         raise NotImplementedError()
@@ -27,12 +32,18 @@ class LiveBarFeed(BaseBarFeed):
 
     def getNextBars(self):
         if not self.__bars_buf:
-            tmp = history(self.__instrument)
+            logger.info('featch history of {0}'.format(self.__instrument))
+            if self.getFrequency() == Frequency.DAY:
+                tmp = history(self.__instrument, self.__start_date, None,
+                              TimeSeries.TIME_DAILY)
+            else:
+                logger.error('unsupported frequency {0}'.format(self.getFrequency()))
             if tmp is None:
                 return None
-            for date, row in tmp.iloc[0]:
+            for date, row in tmp.iloc[0].iterrows():
                 tmpbar = bar.BasicBar(date, row['open'], row['high'],
-                                      row['low'], row['close'], 0, False)
+                                      row['low'], row['close'], 0, False,
+                                      self.getFrequency())
                 self.__bars_buf.append(tmpbar)
         try:
             tmp = self.__bars_buf.pop(0)
@@ -45,10 +56,25 @@ class LiveBarFeed(BaseBarFeed):
         if tmp is None:
             return None
         tmp = bar.BasicBar(datetime.datetime.utcnow(),
-                           tmp.iloc[0]['close'],
-                           tmp.iloc[0]['close'],
-                           tmp.iloc[0]['close'],
-                           tmp.iloc[0]['close'],
-                           0, False)
+                           tmp.iloc[0]['close'].iloc[0],
+                           tmp.iloc[0]['close'].iloc[0],
+                           tmp.iloc[0]['close'].iloc[0],
+                           tmp.iloc[0]['close'].iloc[0],
+                           0, False, self.getFrequency())
         ret = {self.__instrument: tmp}
         return bar.Bars(ret)
+
+    def join(self):
+        pass
+
+    def eof(self):
+        return False
+
+    def peekDateTime(self):
+        return None
+
+    def start(self):
+        super(LiveBarFeed, self).start()
+
+    def stop(self):
+        pass
