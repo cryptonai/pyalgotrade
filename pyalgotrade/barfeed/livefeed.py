@@ -101,7 +101,7 @@ class LiveBarFeed(BaseBarFeed):
             if self.getFrequency() == Frequency.DAY and deltaTime.total_seconds() > 60*60*24:
                 self.__nextRealtimeBars['close'] = tmpVal
                 row = self.__nextRealtimeBars
-                tmpbar = bar.BasicBar(date, row['open'], row['high'],
+                tmpbar = bar.BasicBar(curTime, row['open'], row['high'],
                                       row['low'], row['close'], 0, False,
                                       self.getFrequency())
                 self.__bars_buf.append(tmpbar)
@@ -112,10 +112,11 @@ class LiveBarFeed(BaseBarFeed):
                     'close': None,
                     'start' : None,
                 }
+                return None
             elif self.getFrequency() == Frequency.HOUR and deltaTime.total_seconds() > 60*60:
                 self.__nextRealtimeBars['close'] = tmpVal
                 row = self.__nextRealtimeBars
-                tmpbar = bar.BasicBar(date, row['open'], row['high'],
+                tmpbar = bar.BasicBar(curTime, row['open'], row['high'],
                                       row['low'], row['close'], 0, False,
                                       self.getFrequency())
                 self.__bars_buf.append(tmpbar)
@@ -126,6 +127,7 @@ class LiveBarFeed(BaseBarFeed):
                     'close': None,
                     'start' : None,
                 }
+                return None
         ret = {self.__instrument: tmp}
         return bar.Bars(ret)
 

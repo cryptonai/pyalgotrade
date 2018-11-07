@@ -131,6 +131,11 @@ class BaseFeed(observer.Subject):
             dateTime, values = self.getNextRealtimeValuesAndUpdateDS()
             if dateTime is not None:
                 self.__realtimeEvent.emit(dateTime, values)
+            else:
+                # Ugly Hack
+                dateTime, values = self.getNextValuesAndUpdateDS()
+                if dateTime is not None:
+                    self.__event.emit(dateTime, values)
         return dateTime is not None
 
     def getKeys(self):
