@@ -87,10 +87,6 @@ class BaseBarFeed(feed.BaseFeed):
         """
         raise NotImplementedError()
 
-    @abc.abstractmethod
-    def getNextRealtimeBars(self):
-        raise NotImplementedError()
-
     def createDataSeries(self, key, maxLen):
         ret = bards.BarDataSeries(maxLen)
         ret.setUseAdjustedValues(self.__useAdjustedValues)
@@ -103,37 +99,17 @@ class BaseBarFeed(feed.BaseFeed):
             dateTime = bars.getDateTime()
 
             # Check that current bar datetimes are greater than the previous one.
-            if self.__currentBars is not None and self.__currentBars.getDateTime() >= dateTime:
-                raise Exception(
-                    "Bar date times are not in order. Previous datetime was %s and current datetime is %s" % (
-                        self.__currentBars.getDateTime(),
-                        dateTime
+            if self.__currentBars is not None and self.__currentBars.getDateTime() > dateTime:
+                if bars.getBarFrequency() == self.__currentBars.getBarFrequency():
+                    raise Exception(
+                        "Bar date times are not in order. Previous datetime was %s and current datetime is %s" % (
+                            self.__currentBars.getDateTime(),
+                            dateTime
+                        )
                     )
-                )
 
             # Update self.__currentBars and self.__lastBars
             self.__currentBars = bars
-            for instrument in bars.getInstruments():
-                self.__lastBars[instrument] = bars[instrument]
-        return (dateTime, bars)
-
-    def getNextRealtimeValues(self):
-        dateTime = None
-        bars = self.getNextRealtimeBars()
-        if bars is not None:
-            dateTime = bars.getDateTime()
-
-            # Check that current bar datetimes are greater than the previous one.
-            if self.__currentRealtimeBars is not None and self.__currentRealtimeBars.getDateTime() >= dateTime:
-                raise Exception(
-                    "Bar date times are not in order. Previous datetime was %s and current datetime is %s" % (
-                        self.__currentRealtimeBars.getDateTime(),
-                        dateTime
-                    )
-                )
-
-            # Update self.__currentRealtimeBars and self.__lastBars
-            self.__currentRealtimeBars = bars
             for instrument in bars.getInstruments():
                 self.__lastBars[instrument] = bars[instrument]
         return (dateTime, bars)
@@ -180,6 +156,19 @@ class BaseBarFeed(feed.BaseFeed):
 
     def getDispatchPriority(self):
         return dispatchprio.BAR_FEED
+
+
+class MultiFrequencyBarFeed(BaseBarFeed):
+    def __init__(self, frequencies, maxLen=None):
+        super(MultiFrequencyBarFeed, self).__init__(frequency=None, maxLen=maxLen)
+        assert isinstance(frequencies, list)
+        self.__frequencies = frequencies
+
+    def getFrequency(self):
+        raise Exception('{0} has multiple frequencies.'.format(self.__class__))
+
+    def getFrequencies(self):
+        return self.__frequencies
 
 
 # This class is used by the optimizer module. The barfeed is already built on the server side,

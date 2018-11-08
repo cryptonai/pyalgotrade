@@ -59,7 +59,6 @@ class BaseStrategy(object):
         self.__dispatcher = dispatcher.Dispatcher()
         self.__broker.getOrderUpdatedEvent().subscribe(self.__onOrderEvent)
         self.__barFeed.getNewValuesEvent().subscribe(self.__onBars)
-        self.__barFeed.getNewRealtimeValuesEvent().subscribe(self.__onRealtimeBars)
 
         # onStart will be called once all subjects are started.
         self.__dispatcher.getStartEvent().subscribe(self.onStart)
@@ -469,10 +468,6 @@ class BaseStrategy(object):
         """
         raise NotImplementedError()
 
-    @abc.abstractmethod
-    def onRealtimeBars(self, bars):
-        raise NotImplementedError()
-
     def onOrderUpdated(self, order):
         """Override (optional) to get notified when an order gets updated.
 
@@ -513,9 +508,6 @@ class BaseStrategy(object):
 
         # 3: Notify that the bars were processed.
         self.__barsProcessedEvent.emit(self, bars)
-
-    def __onRealtimeBars(self, dateTime, bars):
-        self.onRealtimeBars(bars)
 
     def run(self):
         """Call once (**and only once**) to run the strategy."""
