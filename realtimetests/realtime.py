@@ -1,6 +1,7 @@
 from pyalgotrade import strategy
 from pyalgotrade.barfeed import livefeed
 from pyalgotrade import bar
+import pyalgotrade.technical as pt
 from quantlib.const.market import TimeSeries
 import datetime as dt
 import talib
@@ -115,6 +116,8 @@ def test1():
     #feed.addBarsFromCSV("orcl", "WIKI-ORCL-2000-quandl.csv")
 
     # Evaluate the strategy with the feed's bars.
+    ds = feed.getDataSeries(instrument='spot_gold@fx678')
+    atr = pt.atr.ATR(ds, maxLen=20)
     myStrategy = MyStrategy(feed, 'spot_gold@fx678')
     myStrategy.run()
     print("Final portfolio value: $%.2f" % myStrategy.getBroker().getEquity())
