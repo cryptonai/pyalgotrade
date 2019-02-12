@@ -22,6 +22,7 @@ class LiveBarFeed(MultiFrequencyBarFeed):
         if not isinstance(frequencies, list):
             frequencies = [frequencies]
         super(LiveBarFeed, self).__init__(frequencies, maxLen=maxLen)
+        self.registerDataSeries(instrument)
         self.__instrument = instrument
         self.__last_date = None
         self.__bars_buf = []
