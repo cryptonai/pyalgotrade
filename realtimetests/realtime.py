@@ -118,7 +118,7 @@ def test1():
     # Evaluate the strategy with the feed's bars.
     myStrategy = MyStrategy(feed, 'spot_gold@fx678')
 
-    ds = feed.getDataSeries(instrument='spot_gold@fx678')
+    ds = feed.getDataSeries(instrument='spot_gold@fx678', freq=bar.Frequency.DAY)
     atr = ptatr.ATR(ds, period=20, maxLen=100)
 
     myStrategy.run()

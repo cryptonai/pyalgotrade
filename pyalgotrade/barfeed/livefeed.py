@@ -25,7 +25,8 @@ class LiveBarFeed(MultiFrequencyBarFeed):
 
         # proactivly register our instrument just incase not found if
         # someone tries to call getDataSeries()
-        self.registerDataSeries(instrument)
+        for i in frequencies:
+            self.registerDataSeries(instrument, i)
 
         self.__instrument = instrument
         self.__last_date = None

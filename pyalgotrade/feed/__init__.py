@@ -46,23 +46,19 @@ class BaseFeed(observer.Subject):
         This is a base class and should not be used directly.
     """
 
-    def __init__(self, maxLen, freqs=None):
+    def __init__(self, maxLen):
         super(BaseFeed, self).__init__()
 
         maxLen = dataseries.get_checked_max_len(maxLen)
-
-        assert isinstance(freqs, list)
-        self.__freqs = freqs
+        self.__registered_ds = []
         self.__ds = {}
         self.__event = observer.Event()
         self.__maxLen = maxLen
 
     def reset(self):
-        oldds = self.__ds
-        keys = list(self.__ds.keys())
         self.__ds = {}
-        for key in keys:
-            self.registerDataSeries(key)
+        for key, freq in self.__registered_ds:
+            self.registerDataSeries(key, freq)
 
     # Subclasses should implement this and return the appropriate dataseries for the given key.
     @abc.abstractmethod
@@ -76,14 +72,15 @@ class BaseFeed(observer.Subject):
     def getNextValues(self):
         raise NotImplementedError()
 
-    def registerDataSeries(self, key):
-        for i in self.__freqs:
-            self.__registerDataSeries(key, i)
-
-    def __registerDataSeries(self, key, freq):
-        if key not in self.__ds:
+    def registerDataSeries(self, key, freq):
+        if key not in self.__ds.keys():
             self.__ds[key] = {}
-            self.__ds[key][freq] = self.createDataSeries(key, self.__maxLen)
+        self.__ds[key][freq] = self.createDataSeries(key, self.__maxLen)
+        for i in self.__registered_ds:
+            k, v = i
+            if k == key and v == freq:
+                return
+        self.__registered_ds.append((key, freq))
 
     def getNextValuesAndUpdateDS(self):
         dateTime, values, freq = self.getNextValues()
@@ -119,12 +116,14 @@ class BaseFeed(observer.Subject):
     def getKeys(self):
         return list(self.__ds.keys())
 
-    def __getitem__(self, key, freq=None):
+    def __getitem__(self, val):
         """Returns the :class:`pyalgotrade.dataseries.DataSeries` for a given key."""
+        key, freq = val
         return self.__ds[key][freq]
 
     def __contains__(self, key, freq=None):
         """Returns True if a :class:`pyalgotrade.dataseries.DataSeries` for the given key is available."""
+        key, freq = val
         if freq is not None:
             return key in self.__ds
         else:
