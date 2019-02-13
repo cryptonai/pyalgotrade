@@ -46,16 +46,19 @@ class BaseFeed(observer.Subject):
         This is a base class and should not be used directly.
     """
 
-    def __init__(self, maxLen):
+    def __init__(self, maxLen, freqs=None):
         super(BaseFeed, self).__init__()
 
         maxLen = dataseries.get_checked_max_len(maxLen)
 
+        assert isinstance(freqs, list)
+        self.__freqs = freqs
         self.__ds = {}
         self.__event = observer.Event()
         self.__maxLen = maxLen
 
     def reset(self):
+        oldds = self.__ds
         keys = list(self.__ds.keys())
         self.__ds = {}
         for key in keys:
@@ -74,21 +77,26 @@ class BaseFeed(observer.Subject):
         raise NotImplementedError()
 
     def registerDataSeries(self, key):
+        for i in self.__freqs:
+            self.__registerDataSeries(key, i)
+
+    def __registerDataSeries(self, key, freq):
         if key not in self.__ds:
-            self.__ds[key] = self.createDataSeries(key, self.__maxLen)
+            self.__ds[key] = {}
+            self.__ds[key][freq] = self.createDataSeries(key, self.__maxLen)
 
     def getNextValuesAndUpdateDS(self):
-        dateTime, values = self.getNextValues()
+        dateTime, values, freq = self.getNextValues()
         if dateTime is not None:
             for key, value in values.items():
                 # Get or create the datseries for each key.
                 try:
-                    ds = self.__ds[key]
+                    ds = self.__ds[key][freq]
                 except KeyError:
                     ds = self.createDataSeries(key, self.__maxLen)
-                    self.__ds[key] = ds
+                    self.__ds[key][freq] = ds
                 ds.appendWithDateTime(dateTime, value)
-        return (dateTime, values)
+        return (dateTime, values, freq)
 
     def __iter__(self):
         return feed_iterator(self)
@@ -103,7 +111,7 @@ class BaseFeed(observer.Subject):
         return self.__event
 
     def dispatch(self):
-        dateTime, values = self.getNextValuesAndUpdateDS()
+        dateTime, values, _ = self.getNextValuesAndUpdateDS()
         if dateTime is not None:
             self.__event.emit(dateTime, values)
         return dateTime is not None
@@ -111,10 +119,13 @@ class BaseFeed(observer.Subject):
     def getKeys(self):
         return list(self.__ds.keys())
 
-    def __getitem__(self, key):
+    def __getitem__(self, key, freq=None):
         """Returns the :class:`pyalgotrade.dataseries.DataSeries` for a given key."""
-        return self.__ds[key]
+        return self.__ds[key][freq]
 
-    def __contains__(self, key):
+    def __contains__(self, key, freq=None):
         """Returns True if a :class:`pyalgotrade.dataseries.DataSeries` for the given key is available."""
-        return key in self.__ds
+        if freq is not None:
+            return key in self.__ds
+        else:
+            return (key in self.__ds and freq in self.__ds[key])

@@ -95,12 +95,13 @@ class BaseBarFeed(feed.BaseFeed):
     def getNextValues(self):
         dateTime = None
         bars = self.getNextBars()
+        freq = bars.getBarFrequency()
         if bars is not None:
             dateTime = bars.getDateTime()
 
             # Check that current bar datetimes are greater than the previous one.
             if self.__currentBars is not None and self.__currentBars.getDateTime() > dateTime:
-                if bars.getBarFrequency() == self.__currentBars.getBarFrequency():
+                if freq == self.__currentBars.getBarFrequency():
                     raise Exception(
                         "Bar date times are not in order. Previous datetime was %s and current datetime is %s" % (
                             self.__currentBars.getDateTime(),
@@ -112,7 +113,7 @@ class BaseBarFeed(feed.BaseFeed):
             self.__currentBars = bars
             for instrument in bars.getInstruments():
                 self.__lastBars[instrument] = bars[instrument]
-        return (dateTime, bars)
+        return (dateTime, bars, freq)
 
     def getFrequency(self):
         return self.__frequency
