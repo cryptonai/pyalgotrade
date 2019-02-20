@@ -131,4 +131,6 @@ def test2():
         obj.pushData(i)
         print('{0}, MA {1}'.format(obj.getRawData(), obj.currentValue()))
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
 test1()
