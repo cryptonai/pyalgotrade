@@ -4,7 +4,6 @@ import pytz
 import dateutil.parser as dp
 import pandas as pd
 from zipline.utils.calendars import get_calendar
-import quantlib.tools.debug as dbg
 
 def market_datetime_massage(start=None, end=None):
     '''
