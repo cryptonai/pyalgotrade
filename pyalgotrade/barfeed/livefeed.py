@@ -3,9 +3,8 @@ from pyalgotrade.dataseries import bards
 from pyalgotrade import feed
 from pyalgotrade import dispatchprio
 from pyalgotrade.barfeed import BaseBarFeed, MultiFrequencyBarFeed
-from quantlib.net2 import quote, history
+from pyalgotrade.backend import quote, history
 import pyalgotrade.logger
-from quantlib.const.market import TimeSeries
 import pytz
 import datetime
 import time
@@ -61,10 +60,10 @@ class LiveBarFeed(MultiFrequencyBarFeed):
                 tmp = None
                 if i == Frequency.DAY:
                     tmp = history(self.__instrument, self.__start_date, None,
-                                TimeSeries.TIME_DAILY, add_missing_dates=False)
+                                Frequency.DAY, add_missing_dates=False)
                 elif i == Frequency.HOUR:
                     tmp = history(self.__instrument, self.__start_date, None,
-                                TimeSeries.TIME_60MIN, add_missing_dates=False)
+                                Frequency.HOUR, add_missing_dates=False)
                 if tmp is None:
                     continue
                 for date, row in tmp.iloc[0].iterrows():

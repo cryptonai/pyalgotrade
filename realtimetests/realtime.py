@@ -2,7 +2,6 @@ from pyalgotrade import strategy
 from pyalgotrade.barfeed import livefeed
 from pyalgotrade import bar
 import pyalgotrade.technical.atr as ptatr
-from quantlib.const.market import TimeSeries
 import datetime as dt
 import talib
 import numpy

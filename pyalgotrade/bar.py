@@ -42,6 +42,7 @@ class Frequency(object):
     SECOND = 1
     MINUTE = 60
     HOUR = 60*60
+    HOUR_4 = 60*60*4
     DAY = 24*60*60
     WEEK = 24*60*60*7
     MONTH = 24*60*60*31
