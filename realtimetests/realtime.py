@@ -1,10 +1,11 @@
 from pyalgotrade import strategy
 from pyalgotrade.barfeed import livefeed
-from pyalgotrade import bar
+from pyalgotrade import bar as barcls
 import pyalgotrade.technical.atr as ptatr
 import datetime as dt
 import talib
 import numpy
+import sys
 
 class MovingAverage(object):
     def __init__(self, length):
@@ -68,6 +69,8 @@ class MyStrategy(strategy.LiveStrategy):
         ma58 = MovingAverage(58)
         ma200 = MovingAverage(200)
         self.__ma = [ma10, ma20, ma58, ma200]
+        self.firsttime = True
+        self.time1 = None
 
     def getMA(self, days):
         for i in self.__ma:
@@ -90,6 +93,20 @@ class MyStrategy(strategy.LiveStrategy):
         bar = bars[self.__instrument]
         self.calculateData(bar)
         
+        if bar.getFrequency() == barcls.Frequency.REALTIME and self.firsttime:
+            self.firsttime = False
+            self.snapshot1 = tracemalloc.take_snapshot()
+            self.time1 = dt.datetime.now()
+        
+        if self.time1 and dt.datetime.now() - self.time1 > dt.timedelta(hours=5):
+            self.snapshot2 = tracemalloc.take_snapshot()
+            top_stats = self.snapshot2.compare_to(self.snapshot1, 'lineno')
+            print("[ Top 10 differences ]")
+            for stat in top_stats[:20]:
+                print(stat)
+            sys.exit(0)
+
+
         ma10 = self.getMA(10)
         ma20 = self.getMA(20)
         ma58 = self.getMA(58)
@@ -108,16 +125,16 @@ class MyStrategy(strategy.LiveStrategy):
 
 def test1():
     # Load the bar feed from the CSV file
-    feed = livefeed.LiveBarFeed('spot_gold@fx678', [bar.Frequency.DAY,
-                                                    bar.Frequency.MINUTE,
-                                                    bar.Frequency.REALTIME],
+    feed = livefeed.LiveBarFeed('spot_gold@fx678', [barcls.Frequency.DAY,
+                                                    barcls.Frequency.MINUTE,
+                                                    barcls.Frequency.REALTIME],
                                 start=dt.datetime(2018, 10, 1))
     #feed.addBarsFromCSV("orcl", "WIKI-ORCL-2000-quandl.csv")
 
     # Evaluate the strategy with the feed's bars.
     myStrategy = MyStrategy(feed, 'spot_gold@fx678')
 
-    ds = feed.getDataSeries(instrument='spot_gold@fx678', freq=bar.Frequency.DAY)
+    ds = feed.getDataSeries(instrument='spot_gold@fx678', freq=barcls.Frequency.DAY)
     atr = ptatr.ATR(ds, period=20, maxLen=100)
 
     myStrategy.run()
@@ -133,4 +150,6 @@ def test2():
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
+import tracemalloc
+tracemalloc.start()
 test1()
