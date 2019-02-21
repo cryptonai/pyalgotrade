@@ -11,13 +11,13 @@ import six
 
 import six.moves.urllib.parse as parse
 import six.moves.urllib.request as request
-from pyalgotrade.backend.const.col_names import StockColumns
-from pyalgotrade.backend.const.market import MarketCommonSymbols
-from pyalgotrade.backend.tools.date import date2timestamp
-from pyalgotrade.backend.query_layer import register_agent, MarketDataProvider
+from pyalgotrade.livefeedbackend.const.col_names import StockColumns
+from pyalgotrade.livefeedbackend.const.market import MarketCommonSymbols
+from pyalgotrade.livefeedbackend.tools.date import date2timestamp
+from pyalgotrade.livefeedbackend.query_layer import register_agent, MarketDataProvider
 from pyalgotrade.bar import Frequency
 
-logger = logging.getLogger('pyalgotrade.backend')
+logger = logging.getLogger('pyalgotrade.livefeedbackend')
 
 
 HIST_BASE_URL = 'http://api.q.fx678.com/tradingview/api/history?'

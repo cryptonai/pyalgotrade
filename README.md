@@ -55,7 +55,7 @@ pip install pyalgotrade
 Realtime Processing
 ------------
 
-Now with pyalgotrade.backend library(private, plan to open soon.), realtime data processing is enabled. The strategy can
+Now with pyalgotrade.livefeedbackend library(private, plan to open soon.), realtime data processing is enabled. The strategy can
 accept multiple time frequencies so that some special needs can be met. For example, I want to monitor minute data
 to guide my trade which is mainly based on daily OHLC data. In this way, I can avoid significant loss when price
 made a `yuge' change during a day.

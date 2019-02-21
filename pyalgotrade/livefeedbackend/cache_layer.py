@@ -11,7 +11,7 @@ from .query_layer import ql_history, parse_symbol_string
 
 import logging
 
-logger = logging.getLogger('pyalgotrade.backend')
+logger = logging.getLogger('pyalgotrade.livefeedbackend')
 
 DBNAME = 'assets_history'
 

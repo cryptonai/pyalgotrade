@@ -11,7 +11,7 @@ from pymongo import ASCENDING, DESCENDING, IndexModel, MongoClient
 import logging
 from pyalgotrade.bar import Frequency
 
-logger  = logging.getLogger('pyalgotrade.backend')
+logger  = logging.getLogger('pyalgotrade.livefeedbackend')
 
 class MongoHistoryData(object):
     ''' This is the class to save history data and load history data

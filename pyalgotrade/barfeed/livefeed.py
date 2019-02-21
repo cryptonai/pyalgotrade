@@ -3,7 +3,7 @@ from pyalgotrade.dataseries import bards
 from pyalgotrade import feed
 from pyalgotrade import dispatchprio
 from pyalgotrade.barfeed import BaseBarFeed, MultiFrequencyBarFeed
-from pyalgotrade.backend import quote, history
+from pyalgotrade.livefeedbackend import quote, history
 import pyalgotrade.logger
 import pytz
 import datetime

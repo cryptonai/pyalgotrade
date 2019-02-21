@@ -9,7 +9,7 @@ import six.moves.http_cookiejar as cookielib
 import six.moves.urllib.parse as parse
 import six.moves.urllib.request as request
 
-logger = logging.getLogger('pyalgotrade.backend')
+logger = logging.getLogger('pyalgotrade.livefeedbackend')
 
 
 class WebRequest(object):

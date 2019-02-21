@@ -22,7 +22,7 @@ from zipline.utils.calendars import get_calendar
 from pyalgotrade.bar import Frequency
 
 
-logger = logging.getLogger('pyalgotrade.backend')
+logger = logging.getLogger('pyalgotrade.livefeedbackend')
 
 
 def market_datetime_massage(start=None, end=None):
