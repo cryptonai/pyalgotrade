@@ -22,9 +22,6 @@ class MyStrategy(strategy.LiveStrategy):
         self.ma58 = ptma.SMA(pds, period=58, maxLen=150)
         self.ma200 = ptma.SMA(pds, period=200, maxLen=250)
 
-    def getATR(self):
-        return self.atr20[-1]
-
     def onBars(self, bars):
         bar = bars[self.__instrument]
 
