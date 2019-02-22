@@ -41,6 +41,11 @@ class MyStrategy(strategy.LiveStrategy):
                                 self.ma10[-1], self.ma20[-1], self.ma58[-1], self.ma200[-1],
                                 self.atr20[-1], bar.getFrequency()))
 
+    def onOrderUpdated(self, order):
+        # this is called by strategy base
+        super(MyStrategy, self).onOrderUpdated(order)
+
+
 def main():
     # Load the bar feed from the CSV file
     feed = livefeed.LiveBarFeed('spot_gold@fx678', [barcls.Frequency.DAY,
